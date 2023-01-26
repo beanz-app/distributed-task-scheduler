@@ -1,6 +1,5 @@
 import { getNewRedisClient, IEvent } from 'ioredis-streams';
-import { Redis } from 'ioredis';
-import { config } from '../../config';
+import { Cluster, Redis } from 'ioredis';
 import loggerFactory from '../../utils/logging';
 import { IScheduledEvent, Task } from '../../streams/events/scheduler';
 
@@ -26,13 +25,13 @@ const redisLuaCommands: { [name in CommandName]: { numberOfKeys: number, lua: st
 }
 
 export class RedisHandler {
-  private client: Redis;
+  private client: Redis | Cluster;
   private sortedSetKey = 'ZSET:SCHEDULED:ITEMS';
   private hashSetKey = 'HSET:ITEMS';
 
   constructor(
   ) {
-    this.client = getNewRedisClient({ host: config.redisHost, port: config.redisPort });
+    this.client = getNewRedisClient();
 
 
     for (const name of Object.keys(redisLuaCommands)) {
